@@ -25,7 +25,7 @@ function ErrorView({ error }: ErrorComponentProps) {
   const router = useRouter();
   return (
     <div className="p-8">
-      <p className="text-destructive">Erro ao carregar leads: {error.message}</p>
+      <p className="text-destructive">Erro ao carregar leads: {error instanceof Error ? error.message : String(error)}</p>
       <button className="mt-4 rounded-md bg-primary px-4 py-2 text-primary-foreground" onClick={() => router.invalidate()}>
         Tentar novamente
       </button>
