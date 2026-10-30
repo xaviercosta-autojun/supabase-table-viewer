@@ -1,3 +1,16 @@
+# Diário
+
+- Sugestões: A IA sugeriu adicionar um login/autenticação.
+- Aceito: Foram aceitas as implementações dos 3 prompts.
+- Rejeitado: Foi rejeitada a sugestão de adicionar um login.
+
+# Questões:
+
+- Onde esse dado fica guardado?
+Os dados ficam guardados na tabela no Supabase (que é armazenada em um servidor na nuvem).
+- O que acontece se eu apagar esta linha no Supabase?
+Se você apagar uma linha no Supabase, ela desaparece completamente do site, porque o projeto no Lovable usa a tabela do Supabase para guardar os dados.
+
 # Supabase Table Viewer
 
 I need you to create a screen that shows the contents of a Supabase Table I have.
