@@ -1,4 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
 
 export type Lead = {
   id: number;
@@ -19,7 +20,6 @@ export const getLeads = createServerFn({ method: "GET" }).handler(async (): Prom
   return (data ?? []).map((r) => ({ ...r, Valor: r.Valor == null ? null : Number(r.Valor) }));
 });
 
-import { z } from "zod";
 
 export const newLeadSchema = z.object({
   Nome: z.string().trim().min(1, "Informe o nome").max(200),
