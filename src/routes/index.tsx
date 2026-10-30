@@ -2,7 +2,7 @@ import { createFileRoute, useRouter, type ErrorComponentProps } from "@tanstack/
 import { queryOptions, useSuspenseQuery, useQueryClient } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
-import { getLeads, addLead } from "@/lib/leads.functions";
+import { getLeads, addLead, updateLeadStage, STAGES } from "@/lib/leads.functions";
 
 const leadsQuery = queryOptions({ queryKey: ["leads"], queryFn: () => getLeads() });
 
@@ -65,7 +65,7 @@ function LeadsPage() {
                   <td className="px-4 py-3 font-medium">{l.Nome ?? "—"}</td>
                   <td className="px-4 py-3">{l.empresa ?? "—"}</td>
                   <td className="px-4 py-3">{l.Valor == null ? "—" : brl.format(l.Valor)}</td>
-                  <td className="px-4 py-3"><span className="rounded-full bg-secondary px-2 py-1 text-xs">{l.Etapa ?? "—"}</span></td>
+                  <td className="px-4 py-3"><StageSelect id={l.id} value={l.Etapa} /></td>
                   <td className="px-4 py-3 text-muted-foreground">{new Date(l.created_at).toLocaleString("pt-BR")}</td>
                 </tr>
               ))
@@ -80,7 +80,7 @@ function LeadsPage() {
 function NewLeadForm() {
   const qc = useQueryClient();
   const add = useServerFn(addLead);
-  const [form, setForm] = useState({ Nome: "", empresa: "", Valor: "", Etapa: "" });
+  const [form, setForm] = useState({ Nome: "", empresa: "", Valor: "", Etapa: "Novo" });
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState<string | null>(null);
 
@@ -93,7 +93,7 @@ function NewLeadForm() {
     setErr(null);
     try {
       await add({ data: { Nome: form.Nome, empresa: form.empresa, Valor: valor, Etapa: form.Etapa } });
-      setForm({ Nome: "", empresa: "", Valor: "", Etapa: "" });
+      setForm({ Nome: "", empresa: "", Valor: "", Etapa: "Novo" });
       await qc.invalidateQueries({ queryKey: ["leads"] });
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Erro ao salvar");
@@ -110,12 +110,43 @@ function NewLeadForm() {
         <input className={field} placeholder="Nome *" maxLength={200} value={form.Nome} onChange={(e) => setForm({ ...form, Nome: e.target.value })} />
         <input className={field} placeholder="Empresa" maxLength={200} value={form.empresa} onChange={(e) => setForm({ ...form, empresa: e.target.value })} />
         <input className={field} placeholder="Valor (R$)" inputMode="decimal" value={form.Valor} onChange={(e) => setForm({ ...form, Valor: e.target.value })} />
-        <input className={field} placeholder="Etapa" maxLength={100} value={form.Etapa} onChange={(e) => setForm({ ...form, Etapa: e.target.value })} />
+        <select className={field} aria-label="Etapa" value={form.Etapa} onChange={(e) => setForm({ ...form, Etapa: e.target.value })}>
+          {STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
+        </select>
         <button type="submit" disabled={saving} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground disabled:opacity-50">
           {saving ? "Salvando..." : "Adicionar"}
         </button>
       </div>
       {err && <p className="mt-2 text-sm text-destructive">{err}</p>}
     </form>
+  );
+}
+
+function StageSelect({ id, value }: { id: number; value: string | null }) {
+  const qc = useQueryClient();
+  const update = useServerFn(updateLeadStage);
+  const [saving, setSaving] = useState(false);
+  const current = STAGES.includes(value as (typeof STAGES)[number]) ? value! : "";
+  return (
+    <select
+      aria-label="Etapa do lead"
+      disabled={saving}
+      value={current}
+      onChange={async (e) => {
+        setSaving(true);
+        try {
+          await update({ data: { id, Etapa: e.target.value as (typeof STAGES)[number] } });
+          await qc.invalidateQueries({ queryKey: ["leads"] });
+        } catch {
+          alert("Não foi possível alterar a etapa.");
+        } finally {
+          setSaving(false);
+        }
+      }}
+      className="rounded-md border bg-background px-2 py-1 text-xs disabled:opacity-50"
+    >
+      {current === "" && <option value="" disabled>{value ?? "—"}</option>}
+      {STAGES.map((s) => <option key={s} value={s}>{s}</option>)}
+    </select>
   );
 }

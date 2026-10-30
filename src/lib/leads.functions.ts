@@ -41,3 +41,16 @@ export const addLead = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const STAGES = ["Novo", "Em contato", "Fechado"] as const;
+
+export const updateLeadStage = createServerFn({ method: "POST" })
+  .inputValidator((d: unknown) =>
+    z.object({ id: z.number().int().positive(), Etapa: z.enum(STAGES) }).parse(d),
+  )
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin.from("Leads").update({ Etapa: data.Etapa }).eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
