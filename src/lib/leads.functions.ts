@@ -29,7 +29,7 @@ export const newLeadSchema = z.object({
 });
 
 export const addLead = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) => newLeadSchema.parse(d))
+  .validator((d: unknown) => newLeadSchema.parse(d))
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin.from("Leads").insert({
@@ -45,7 +45,7 @@ export const addLead = createServerFn({ method: "POST" })
 export const STAGES = ["Novo", "Em contato", "Fechado"] as const;
 
 export const updateLeadStage = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
+  .validator((d: unknown) =>
     z.object({ id: z.number().int().positive(), Etapa: z.enum(STAGES) }).parse(d),
   )
   .handler(async ({ data }) => {
