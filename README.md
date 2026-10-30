@@ -7,8 +7,11 @@
 # Questões:
 
 - Onde esse dado fica guardado?
+
 Os dados ficam guardados na tabela no Supabase (que é armazenada em um servidor na nuvem).
+
 - O que acontece se eu apagar esta linha no Supabase?
+
 Se você apagar uma linha no Supabase, ela desaparece completamente do site, porque o projeto no Lovable usa a tabela do Supabase para guardar os dados.
 
 # Supabase Table Viewer
